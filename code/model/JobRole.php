@@ -16,10 +16,15 @@ class JobRole extends DataObject
 
     private static $db = array(
         'Title' => 'Varchar(500)',
-        'Phone' => 'Varchar(30)'
+        'Phone' => 'Varchar(30)',
+        'Email' => 'Varchar(1000)',
+        'Sort'  => 'Int'
     );
 
-    private static $has_one = array(
-        'Location' => 'Location'
+    private static $summary_fields = array(
+        'Title',
+        'Phone'
     );
+
+    private static $default_sort = 'Sort ASC';
 }

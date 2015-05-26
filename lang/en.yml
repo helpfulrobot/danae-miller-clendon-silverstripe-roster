@@ -1,8 +1,12 @@
 en:
   Roster:
+    # Groups
     DefaultGroupTitleStaffMembers: 'Staff Members'
 
     # Permissions
     RosterPermissions: 'Roster Permissions'
     ModifyRoster: 'Modify Roster'
     ModifyRosterHelp: 'Modify Roster'
+
+    # Admin
+    NoRoleWarning: 'Can&apos;t create roster; no job roles exist. Add new roles under the "Job Roles" tab.'

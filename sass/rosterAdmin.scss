@@ -1,0 +1,64 @@
+/** =========================================
+ * Mixins
+ ===========================================*/
+
+@mixin clearfix {
+    &:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+}
+
+/** =========================================
+ * SASS
+ ===========================================*/
+
+#Root_Main #roster-field-wrap {
+
+    .roster-row {
+        display: block;
+        border-bottom: 1px solid #E0E0E0;
+        padding: 10px 0;
+        @include clearfix;
+    }
+
+    .field.listbox, p {
+        width: 80px;
+        vertical-align: middle;
+        margin: 0;
+        padding: 0;
+        display: inline-block;
+        float: left;
+        border: none;
+    }
+
+    .field {
+        &.listbox-pm {
+            margin-right: 10px;
+        }
+
+        &.listbox-am {
+            margin-right: 4px;
+        }
+    }
+
+    .listbox {
+        ul.chzn-choices {
+            width: 80px;
+        }
+    }
+
+    p {
+        width: 12%;
+        line-height: 27px;
+    }
+
+    .middleColumn {
+        margin-left: 0;
+    }
+
+    label.left {
+        display: none;
+    }
+}

@@ -7,6 +7,8 @@
 
 /**
  * Class RosterAdmin
+ *
+ * @TODO: Add GridFieldOrderableRows to the gridfield (JobRole)
  */
 class RosterAdmin extends ModelAdmin
 {
@@ -16,7 +18,6 @@ class RosterAdmin extends ModelAdmin
 
     private static $managed_models = array(
         'Roster',
-        'Location',
         'JobRole'
     );
 }
