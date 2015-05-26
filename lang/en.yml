@@ -1,0 +1,8 @@
+en:
+  Roster:
+    DefaultGroupTitleStaffMembers: 'Staff Members'
+
+    # Permissions
+    RosterPermissions: 'Roster Permissions'
+    ModifyRoster: 'Modify Roster'
+    ModifyRosterHelp: 'Modify Roster'
