@@ -1,0 +1,19 @@
+.roster-gridfield .chzn-container {
+    width: 90px !important;
+}
+
+.roster-gridfield .chzn-container-multi .chzn-choices .search-choice {
+    background: #e6e6e6 none;
+    border:     1px solid #b0b0b0;
+    color:      #808080;
+    box-shadow: none;
+    margin:     1px;
+}
+
+.roster-gridfield .ss-gridfield-title-header.weekdays th.main {
+    border-bottom-width: 0;
+}
+
+.roster-gridfield .ss-gridfield-table .ss-gridfield-item.last td {
+     border-bottom: 1px solid rgba(0, 0, 0, 0.1)
+}

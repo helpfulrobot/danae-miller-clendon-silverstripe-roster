@@ -148,7 +148,7 @@ class Roster extends DataObject implements PermissionProvider
                 ));
 
                 // Adjust the WeeklyRoster gridfield
-                $grid = new GridField(
+                $grid = GridField::create(
                     'WeeklyRosters',
                     'Weekly Roster for ' . $this->dbObject('StartDate')->Nice(),
                     $this->WeeklyRosters(),
@@ -157,7 +157,7 @@ class Roster extends DataObject implements PermissionProvider
                         ->addComponent(new GridFieldToolbarHeader())
                         ->addComponent(new RosterGridFieldTitleHeader())
                         ->addComponent($editableColumns)
-                );
+                )->addExtraClass('roster-gridfield');
 
                 $fields->addFieldToTab('Root.Main', $grid);
 
@@ -176,30 +176,6 @@ class Roster extends DataObject implements PermissionProvider
         }
 
         return $fields;
-    }
-
-    private function makeDisplayFieldArray($staffMap, $numberOfDays)
-    {
-        $weeklyRosters = array();
-
-        $weeklyRosters['Title'] = array(
-            'title' => 'Role',
-            'field' => 'ReadonlyField'
-        );
-
-        for ($i = 0; $i < $numberOfDays; $i++) {
-
-            $weeklyRosters["ManyMany[StaffAm{$i}]"] = function ($record, $column, $grid) use ($staffMap, $i) {
-                return ListboxField::create("ManyMany[StaffAm{$i}]", 'AM', $staffMap)->setMultiple(true);
-            };
-
-            $weeklyRosters["ManyMany[StaffPm{$i}]"] = function ($record, $column, $grid) use ($staffMap, $i) {
-                return ListboxField::create("ManyMany[StaffAm{$i}]", 'PM', $staffMap)->setMultiple(true);
-            };
-
-        }
-
-        return $weeklyRosters;
     }
 
     /**
