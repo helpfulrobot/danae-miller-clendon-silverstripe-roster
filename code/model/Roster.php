@@ -147,11 +147,11 @@ class Roster extends DataObject implements PermissionProvider
                 // Adjust the WeeklyRoster gridfield
                 $grid = GridField::create(
                     'WeeklyRosters',
-                    'Weekly Roster for ' . $this->dbObject('StartDate')->Nice(),
+                    sprintf('Weekly Roster for %s - %s', $this->dbObject('StartDate')->Format('D jS M'), $this->getEndDate()),
                     $this->WeeklyRosters(),
                     GridFieldConfig::create()
                         ->addComponent(new GridFieldToolbarHeader())
-                        ->addComponent(new RosterGridFieldTitleHeader())
+                        ->addComponent(new RosterGridFieldTitleHeader($this->dbObject('StartDate')))
                         ->addComponent($editableColumns)
                 )->addExtraClass('roster-gridfield');
 

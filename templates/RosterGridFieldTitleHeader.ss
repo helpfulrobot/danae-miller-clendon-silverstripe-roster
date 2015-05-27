@@ -1,10 +1,9 @@
 <tr class="ss-gridfield-title-header weekdays">
-    <th class="main">$Now.Format('M Y')</th>
-    <th colspan="2" class="main">Monday</th>
-    <th colspan="2" class="main">Tuesday</th>
-    <th colspan="2" class="main">Wednesday</th>
-    <th colspan="2" class="main">Thursday</th>
-    <th colspan="2" class="main">Friday</th>
+    <th class="main">$StartDate.Format('M Y')</th>
+
+    <% loop $Days %>
+        <th colspan="2" class="main">$Day</th>
+    <% end_loop %>
 </tr>
 
 <tr class="ss-gridfield-title-header">
