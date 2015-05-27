@@ -147,7 +147,7 @@ class Roster extends DataObject implements PermissionProvider
                 // Adjust the WeeklyRoster gridfield
                 $grid = GridField::create(
                     'WeeklyRosters',
-                    sprintf('Weekly Roster for %s - %s', $this->dbObject('StartDate')->Format('D jS M'), $this->getEndDate()),
+                    sprintf('Weekly Roster for %s - %s', $this->dbObject('StartDate')->Format('D jS M'), $this->getEndDate()->Format('D jS M')),
                     $this->WeeklyRosters(),
                     GridFieldConfig::create()
                         ->addComponent(new GridFieldToolbarHeader())
@@ -158,6 +158,12 @@ class Roster extends DataObject implements PermissionProvider
                 $fields->addFieldToTab('Root.Main', $grid);
 
             } else {
+                $fields->addFieldToTab('Root.Main', LiteralField::create('',
+                    sprintf(
+                        '<div class="message notice"><p>%s</p></div>',
+                        _t('Roster.SaveFirstNotice', 'Choose a starting date, then press the green "Save" button at the bottom of the screen.')
+                    )
+                ));
                 $this->WeeklyRosters()->addMany($roles);
             }
 
@@ -174,14 +180,22 @@ class Roster extends DataObject implements PermissionProvider
         return $fields;
     }
 
+    /**
+     * @return string
+     */
     public function getTitle()
     {
-        return sprintf('%s - %s', $this->dbObject('StartDate')->Format('D jS M'), $this->getEndDate());
+        return sprintf('%s - %s', $this->dbObject('StartDate')->Format('D jS M'), $this->getEndDate()->Format('D jS M'));
     }
 
+    /**
+     * @return Date
+     */
     public function getEndDate()
     {
-        return date('D jS M', strtotime("+4 days", strtotime($this->StartDate)));
+        $date = new Date();
+        $date->setValue(date('Y-m-d', strtotime("+4 days", strtotime($this->StartDate))));
+        return $date;
     }
 
     /**
@@ -214,13 +228,13 @@ class Roster extends DataObject implements PermissionProvider
         return array(
             'MODIFY_ROSTER' => array(
                 'category' => _t('Roster.RosterPermissions', 'Roster Permissions'),
-                'name'     => _t('Roster.ModifyRoster', 'Modify Roster'),
+                'name'     => _t('Roster.ModifyRoster', 'Modify roster'),
                 'help'     => _t('Roster.ModifyRosterHelp', 'User can create, edit, and delete rosters.')
             ),
             'VIEW_ROSTER' => array(
                 'category' => _t('Roster.RosterPermissions', 'Roster Permissions'),
                 'name'     => _t('Roster.ViewRoster', 'View Roster'),
-                'help'     => _t('Roster.ViewRosterHelp', 'User cn view the roster')
+                'help'     => _t('Roster.ViewRosterHelp', 'User can view the roster')
             )
         );
     }

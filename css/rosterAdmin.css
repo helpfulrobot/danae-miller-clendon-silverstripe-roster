@@ -1,3 +1,11 @@
+.roster-gridfield {
+    margin-top: 24px;
+}
+
+#StartDate.field {
+    border-bottom: none;
+}
+
 .roster-gridfield .chzn-container {
     width: 90px !important;
 }

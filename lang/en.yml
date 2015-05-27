@@ -6,7 +6,10 @@ en:
     # Permissions
     RosterPermissions: 'Roster Permissions'
     ModifyRoster: 'Modify Roster'
-    ModifyRosterHelp: 'Modify Roster'
+    ModifyRosterHelp: 'Modify roster'
+    ViewRoster: 'View Roster'
+    ViewRosterHelp: 'User can view the roster'
 
     # Admin
     NoRoleWarning: 'Can&apos;t create roster; no job roles exist. Add new roles under the "Job Roles" tab.'
+    SaveFirstNotice: 'Choose a starting date, then press the green "Save" button at the bottom of the screen.'
