@@ -16,7 +16,7 @@ class RosterMember extends DataExtension
 
     public function getInitials()
     {
-        if ($this->owner->owner->Initial == '') {
+        if ($this->owner->getField('Initials') == '') {
             $surname   = $this->owner->getField('Surname');
             $firstName = $this->owner->getField('FirstName');
 
@@ -30,7 +30,7 @@ class RosterMember extends DataExtension
                 return '';
             }
         } else {
-            return $this->owner->owner->Initial;
+            return $this->owner->getField('Initials');
         }
     }
 }

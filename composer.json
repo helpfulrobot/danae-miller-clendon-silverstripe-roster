@@ -2,7 +2,11 @@
   "name": "danae-miller-clendon/silverstripe-roster",
   "description": "Weekly roster system for workplaces",
   "type": "silverstripe-module",
-  "keywords": ["silverstripe", "module", "roster"],
+  "keywords": [
+    "silverstripe",
+    "module",
+    "roster"
+  ],
   "license": "BSD-3-Clause",
   "authors": [
     {
@@ -10,9 +14,9 @@
       "role": "Developer"
     }
   ],
-  "require":
-  {
+  "require": {
     "silverstripe/framework": "~3.1.0",
+    "silverstripe-gridfieldextensions": "~1.0",
     "composer/installers": "*"
   },
   "support": {

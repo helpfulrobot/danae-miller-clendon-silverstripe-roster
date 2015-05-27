@@ -10,6 +10,8 @@
  *
  * @property string StartDate
  *
+ * @method ManyManyList WeeklyRosters
+ *
  * @TODO: Set title to be start date to end date
  * @TODO: Set up data storage for roster
  */
@@ -26,6 +28,29 @@ class Roster extends DataObject implements PermissionProvider
 
     private static $summary_fields = array(
         'StartDate'
+    );
+
+    private static $many_many = array(
+        'WeeklyRosters' => 'JobRole'
+    );
+
+    private static $many_many_extraFields = array(
+        'WeeklyRosters' => array(
+            'StaffAm0' => 'Varchar(20)',
+            'StaffPm0' => 'Varchar(20)',
+            'StaffAm1' => 'Varchar(20)',
+            'StaffPm1' => 'Varchar(20)',
+            'StaffAm2' => 'Varchar(20)',
+            'StaffPm2' => 'Varchar(20)',
+            'StaffAm3' => 'Varchar(20)',
+            'StaffPm3' => 'Varchar(20)',
+            'StaffAm4' => 'Varchar(20)',
+            'StaffPm4' => 'Varchar(20)',
+            'StaffAm5' => 'Varchar(20)',
+            'StaffPm5' => 'Varchar(20)',
+            'StaffAm6' => 'Varchar(20)',
+            'StaffPm6' => 'Varchar(20)'
+        )
     );
 
     /**
@@ -63,6 +88,8 @@ class Roster extends DataObject implements PermissionProvider
          * Staff Roster
         ===========================================*/
 
+        $fields->removeByName(array('WeeklyRosters'));
+
         /** -----------------------------------------
          * Variables
         -------------------------------------------*/
@@ -80,33 +107,63 @@ class Roster extends DataObject implements PermissionProvider
 
         if ($roles->count()) {
 
-            $fields->addFieldsToTab('Root.Main', array(
-                LiteralField::create('', '<div id="roster-field-wrap">')
-            ));
+            if ($this->WeeklyRosters()->count()) {
 
-            // loop through the roles
-            foreach ($roles->getIterator() as $role) {
-                $fields->addFieldsToTab('Root.Main', array(
-                    LiteralField::create('', sprintf('<div class="roster-row"><p><strong>%s</strong>: ', $role->Title))
+                $editableColumns = new GridFieldEditableColumns();
+                $editableColumns->setDisplayFields(array(
+                    'Title' => array(
+                        'title' => 'Role',
+                        'field' => 'ReadonlyField'
+                    ),
+                    'StaffAm0' => function($record, $column, $grid) use ($staffMap) {
+                        return ListboxField::create($column, 'AM', $staffMap)->setMultiple(true);
+                    },
+                    'StaffPm0' => function($record, $column, $grid) use ($staffMap) {
+                        return ListboxField::create($column, 'PM', $staffMap)->setMultiple(true);
+                    },
+                    'StaffAm1' => function($record, $column, $grid) use ($staffMap) {
+                        return ListboxField::create($column, 'AM', $staffMap)->setMultiple(true);
+                    },
+                    'StaffPm1' => function($record, $column, $grid) use ($staffMap) {
+                        return ListboxField::create($column, 'PM', $staffMap)->setMultiple(true);
+                    },
+                    'StaffAm2' => function($record, $column, $grid) use ($staffMap) {
+                        return ListboxField::create($column, 'AM', $staffMap)->setMultiple(true);
+                    },
+                    'StaffPm2' => function($record, $column, $grid) use ($staffMap) {
+                        return ListboxField::create($column, 'PM', $staffMap)->setMultiple(true);
+                    },
+                    'StaffAm3' => function($record, $column, $grid) use ($staffMap) {
+                        return ListboxField::create($column, 'AM', $staffMap)->setMultiple(true);
+                    },
+                    'StaffPm3' => function($record, $column, $grid) use ($staffMap) {
+                        return ListboxField::create($column, 'PM', $staffMap)->setMultiple(true);
+                    },
+                    'StaffAm4' => function($record, $column, $grid) use ($staffMap) {
+                        return ListboxField::create($column, 'AM', $staffMap)->setMultiple(true);
+                    },
+                    'StaffPm4' => function($record, $column, $grid) use ($staffMap) {
+                        return ListboxField::create($column, 'PM', $staffMap)->setMultiple(true);
+                    }
                 ));
 
-                for ($i = 0; $i < $numberOfDays; $i++) {
+                // Adjust the WeeklyRoster gridfield
+                $grid = new GridField(
+                    'WeeklyRosters',
+                    'Weekly Roster for ' . $this->dbObject('StartDate')->Nice(),
+                    $this->WeeklyRosters(),
+                    GridFieldConfig::create()
+                        ->addComponent(new GridFieldButtonRow('before'))
+                        ->addComponent(new GridFieldToolbarHeader())
+                        ->addComponent(new RosterGridFieldTitleHeader())
+                        ->addComponent($editableColumns)
+                );
 
-                    $fields->addFieldsToTab('Root.Main', array(
-                        ListboxField::create("am_{$role->ID}_$i", 'AM', $staffMap)->setMultiple(true)->addExtraClass('listbox-am'),
-                        ListboxField::create("pm_{$role->ID}_$i", 'PM', $staffMap)->setMultiple(true)->addExtraClass('listbox-pm'),
-                    ));
+                $fields->addFieldToTab('Root.Main', $grid);
 
-                }
-
-                $fields->addFieldsToTab('Root.Main', array(
-                    LiteralField::create('', '</p></div>')
-                ));
+            } else {
+                $this->WeeklyRosters()->addMany($roles);
             }
-
-            $fields->addFieldsToTab('Root.Main', array(
-                LiteralField::create('', '</div>')
-            ));
 
         } else {
             // If no job roles exist, display a warning
@@ -119,6 +176,30 @@ class Roster extends DataObject implements PermissionProvider
         }
 
         return $fields;
+    }
+
+    private function makeDisplayFieldArray($staffMap, $numberOfDays)
+    {
+        $weeklyRosters = array();
+
+        $weeklyRosters['Title'] = array(
+            'title' => 'Role',
+            'field' => 'ReadonlyField'
+        );
+
+        for ($i = 0; $i < $numberOfDays; $i++) {
+
+            $weeklyRosters["ManyMany[StaffAm{$i}]"] = function ($record, $column, $grid) use ($staffMap, $i) {
+                return ListboxField::create("ManyMany[StaffAm{$i}]", 'AM', $staffMap)->setMultiple(true);
+            };
+
+            $weeklyRosters["ManyMany[StaffPm{$i}]"] = function ($record, $column, $grid) use ($staffMap, $i) {
+                return ListboxField::create("ManyMany[StaffAm{$i}]", 'PM', $staffMap)->setMultiple(true);
+            };
+
+        }
+
+        return $weeklyRosters;
     }
 
     /**
