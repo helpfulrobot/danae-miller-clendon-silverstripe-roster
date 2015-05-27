@@ -1,5 +1,5 @@
 <tr class="ss-gridfield-title-header weekdays">
-    <th class="main"></th>
+    <th class="main">$Now.Format('M Y')</th>
     <th colspan="2" class="main">Monday</th>
     <th colspan="2" class="main">Tuesday</th>
     <th colspan="2" class="main">Wednesday</th>

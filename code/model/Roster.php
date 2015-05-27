@@ -178,6 +178,16 @@ class Roster extends DataObject implements PermissionProvider
         return $fields;
     }
 
+    public function getTitle()
+    {
+        return sprintf('%s - %s', $this->dbObject('StartDate')->Format('D jS M'), $this->getEndDate());
+    }
+
+    public function getEndDate()
+    {
+        return date('D jS M', strtotime("+4 days", strtotime($this->StartDate)));
+    }
+
     /**
      * Creates default Staff Member group
      */

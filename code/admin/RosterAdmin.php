@@ -17,7 +17,11 @@ class RosterAdmin extends ModelAdmin
     private static $menu_icon = 'roster/images/icons/roster.png';
 
     private static $managed_models = array(
-        'Roster',
-        'JobRole'
+        'Roster'  => array(
+            'title' => 'Rosters'
+        ),
+        'JobRole' => array(
+            'title' => 'Job Roles'
+        )
     );
 }
