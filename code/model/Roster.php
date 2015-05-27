@@ -9,8 +9,11 @@
  * Class Roster
  *
  * @property string StartDate
+ * @property string Holidays
  *
  * @method ManyManyList WeeklyRosters
+ *
+ * @TODO: Save end date to DB
  */
 class Roster extends DataObject implements PermissionProvider
 {
@@ -20,7 +23,8 @@ class Roster extends DataObject implements PermissionProvider
     private static $default_sort = 'StartDate DESC';
 
     private static $db = array(
-        'StartDate' => 'Date'
+        'StartDate' => 'Date',
+        'Holidays'  => 'Text'
     );
 
     private static $summary_fields = array(
@@ -74,8 +78,21 @@ class Roster extends DataObject implements PermissionProvider
          * Date
          ==========================================*/
 
+        /** @var MultiDateField $holidayField */
+        $holidayField = MultiDateField::create('Holidays');
+        $holidayField->setConfig('dateformat', 'dd-MM-yyyy');
+        $holidayField->setConfig('showcalendar', true);
+        $holidayField->setConfig('separator',', ');
+        $holidayField->setConfig('min', $this->StartDate);
+        $holidayField->setConfig('max', $this->getEndDate());
+
+        /** @var DateField $dateField */
+        $dateField = DateField::create('StartDate');
+        $dateField->setConfig('dateformat', 'dd-MM-yyyy');
+
         $fields->addFieldsToTab('Root.Main', array(
-            $dateField = DateField::create('StartDate')
+            $dateField,
+            $holidayField
         ));
 
         /** @var $dateField DateField */
@@ -151,7 +168,7 @@ class Roster extends DataObject implements PermissionProvider
                     $this->WeeklyRosters(),
                     GridFieldConfig::create()
                         ->addComponent(new GridFieldToolbarHeader())
-                        ->addComponent(new RosterGridFieldTitleHeader($this->dbObject('StartDate')))
+                        ->addComponent(new RosterGridFieldTitleHeader($this->dbObject('StartDate'), $this->getHolidayArray()))
                         ->addComponent($editableColumns)
                 )->addExtraClass('roster-gridfield');
 
@@ -196,6 +213,14 @@ class Roster extends DataObject implements PermissionProvider
         $date = new Date();
         $date->setValue(date('Y-m-d', strtotime("+4 days", strtotime($this->StartDate))));
         return $date;
+    }
+
+    /**
+     * @return array
+     */
+    public function getHolidayArray()
+    {
+        return explode(',', $this->Holidays);
     }
 
     /**

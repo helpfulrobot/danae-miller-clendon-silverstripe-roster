@@ -2,7 +2,12 @@
     <th class="main">$StartDate.Format('M Y')</th>
 
     <% loop $Days %>
-        <th colspan="2" class="main">$Day</th>
+        <th colspan="2" class="main">
+            $Day
+            <% if $IsHoliday %>
+                 (holiday)
+            <% end_if %>
+        </th>
     <% end_loop %>
 </tr>
 

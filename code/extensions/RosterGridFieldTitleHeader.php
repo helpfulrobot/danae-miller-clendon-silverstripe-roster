@@ -10,13 +10,20 @@ class RosterGridFieldTitleHeader implements GridField_HTMLProvider
      */
     private $startDate;
 
-    public function __construct($startDate = null)
+    /**
+     * @var array
+     */
+    private $holidays;
+
+    public function __construct($startDate = null, $holidayArray = array())
     {
         if ($startDate) {
             $this->startDate = $startDate;
         } else {
             $this->startDate = Date::create();
         }
+
+        $this->holidays = $holidayArray;
     }
 
     /**
@@ -39,8 +46,14 @@ class RosterGridFieldTitleHeader implements GridField_HTMLProvider
         $days = new ArrayList();
 
         for ($i = 0; $i < 5; $i++) {
+            $date = new Date();
+            $date->setValue(date('d-m-Y', strtotime('+'.$i.' days', strtotime($this->startDate))));
+
+            $isHoliday = (in_array($date->Format('Y-m-d'), $this->holidays));
+
             $days->push(new ArrayData(array(
-                'Day'  => date('l', strtotime('+'.$i.' days', strtotime($this->startDate)))
+                'Day'       => $date->Format('l'),
+                'IsHoliday' => $isHoliday
             )));
         }
 
