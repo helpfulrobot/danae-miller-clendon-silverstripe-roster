@@ -11,9 +11,6 @@
  * @property string StartDate
  *
  * @method ManyManyList WeeklyRosters
- *
- * @TODO: Set title to be start date to end date
- * @TODO: Set up data storage for roster
  */
 class Roster extends DataObject implements PermissionProvider
 {
@@ -153,7 +150,6 @@ class Roster extends DataObject implements PermissionProvider
                     'Weekly Roster for ' . $this->dbObject('StartDate')->Nice(),
                     $this->WeeklyRosters(),
                     GridFieldConfig::create()
-                        ->addComponent(new GridFieldButtonRow('before'))
                         ->addComponent(new GridFieldToolbarHeader())
                         ->addComponent(new RosterGridFieldTitleHeader())
                         ->addComponent($editableColumns)
@@ -193,10 +189,10 @@ class Roster extends DataObject implements PermissionProvider
      */
     public function requireDefaultRecords()
     {
-        $staffGroup = \Group::get()->filter(array('Code' => 'staff-members'));
+        $staffGroup = Group::get()->filter(array('Code' => 'staff-members'));
         if (!$staffGroup->count()) {
-            /** @var \Group $staffGroup */
-            $staffGroup = \Group::create(
+            /** @var Group $staffGroup */
+            $staffGroup = Group::create(
                 array(
                     'Title' => _t('Roster.DefaultGroupTitleStaffMembers', 'Staff Members'),
                     'Code'  => 'staff-members'
@@ -204,7 +200,9 @@ class Roster extends DataObject implements PermissionProvider
             );
 
             $staffGroup->write();
-            \DB::alteration_message(_t('Roster.GroupCreated', 'Staff Members group created'), 'created');
+            Permission::grant($staffGroup->ID, 'VIEW_ROSTER');
+
+            DB::alteration_message(_t('Roster.GroupCreated', 'Staff Members group created'), 'created');
         }
     }
 
@@ -217,8 +215,29 @@ class Roster extends DataObject implements PermissionProvider
             'MODIFY_ROSTER' => array(
                 'category' => _t('Roster.RosterPermissions', 'Roster Permissions'),
                 'name'     => _t('Roster.ModifyRoster', 'Modify Roster'),
-                'help'     => _t('Roster.ModifyRosterHelp', 'Allow the user to do all kinds of special things')
+                'help'     => _t('Roster.ModifyRosterHelp', 'User can create, edit, and delete rosters.')
+            ),
+            'VIEW_ROSTER' => array(
+                'category' => _t('Roster.RosterPermissions', 'Roster Permissions'),
+                'name'     => _t('Roster.ViewRoster', 'View Roster'),
+                'help'     => _t('Roster.ViewRosterHelp', 'User cn view the roster')
             )
         );
+    }
+
+    public function canCreate($member = null) {
+        return Permission::check('MODIFY_ROSTER', 'any', $member);
+    }
+
+    public function canEdit($member = null) {
+        return Permission::check('MODIFY_ROSTER', 'any', $member);
+    }
+
+    public function canDelete($member = null) {
+        return Permission::check('MODIFY_ROSTER', 'any', $member);
+    }
+
+    public function canView($member = null) {
+        return Permission::check('VIEW_ROSTER', 'any', $member);
     }
 }

@@ -16,3 +16,15 @@
 .roster-gridfield .ss-gridfield-table .ss-gridfield-item.last td {
      border-bottom: 1px solid rgba(0, 0, 0, 0.1)
 }
+
+.roster-gridfield .chzn-container-multi .chzn-choices .search-field input {
+    position: absolute;
+}
+.roster-gridfield .chzn-container-multi .chzn-choices .search-field {
+    height: 27px;
+    position: relative;
+}
+
+.roster-gridfield .chzn-container-multi .chzn-choices {
+    position: relative;
+}
