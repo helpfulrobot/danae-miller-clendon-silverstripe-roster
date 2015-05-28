@@ -9,11 +9,10 @@
  * Class Roster
  *
  * @property string StartDate
+ * @property string EndDate
  * @property string Holidays
  *
  * @method ManyManyList WeeklyRosters
- *
- * @TODO: Save end date to DB
  */
 class Roster extends DataObject implements PermissionProvider
 {
@@ -24,6 +23,7 @@ class Roster extends DataObject implements PermissionProvider
 
     private static $db = array(
         'StartDate' => 'Date',
+        'EndDate'   => 'Date',
         'Holidays'  => 'Text'
     );
 
@@ -84,7 +84,7 @@ class Roster extends DataObject implements PermissionProvider
         $holidayField->setConfig('showcalendar', true);
         $holidayField->setConfig('separator',', ');
         $holidayField->setConfig('min', $this->StartDate);
-        $holidayField->setConfig('max', $this->getEndDate());
+        $holidayField->setConfig('max', $this->EndDate);
 
         /** @var DateField $dateField */
         $dateField = DateField::create('StartDate');
@@ -102,7 +102,7 @@ class Roster extends DataObject implements PermissionProvider
          * Staff Roster
         ===========================================*/
 
-        $fields->removeByName(array('WeeklyRosters'));
+        $fields->removeByName(array('WeeklyRosters', 'EndDate'));
 
         /** -----------------------------------------
          * Variables
@@ -164,7 +164,7 @@ class Roster extends DataObject implements PermissionProvider
                 // Adjust the WeeklyRoster gridfield
                 $grid = GridField::create(
                     'WeeklyRosters',
-                    sprintf('Weekly Roster for %s - %s', $this->dbObject('StartDate')->Format('D jS M'), $this->getEndDate()->Format('D jS M')),
+                    sprintf('Weekly Roster for %s - %s', $this->dbObject('StartDate')->Format('D jS M'), $this->dbObject('EndDate')->Format('D jS M')),
                     $this->WeeklyRosters(),
                     GridFieldConfig::create()
                         ->addComponent(new GridFieldToolbarHeader())
@@ -202,13 +202,13 @@ class Roster extends DataObject implements PermissionProvider
      */
     public function getTitle()
     {
-        return sprintf('%s - %s', $this->dbObject('StartDate')->Format('D jS M'), $this->getEndDate()->Format('D jS M'));
+        return sprintf('%s - %s', $this->dbObject('StartDate')->Format('D jS M'), $this->dbObject('EndDate')->Format('D jS M'));
     }
 
     /**
      * @return Date
      */
-    public function getEndDate()
+    public function calculateEndDate()
     {
         $date = new Date();
         $date->setValue(date('Y-m-d', strtotime("+4 days", strtotime($this->StartDate))));
@@ -245,9 +245,12 @@ class Roster extends DataObject implements PermissionProvider
         }
     }
 
+    /**
+     * @return DataObject
+     */
     public static function getCurrentRoster()
     {
-
+        return self::getRosterForDate(SS_Datetime::now()->Format('Y-m-d'));
     }
 
     /**
@@ -260,16 +263,37 @@ class Roster extends DataObject implements PermissionProvider
         return DataObject::get_one('Roster');
     }
 
+    /**
+     * Return a roster for a particular date
+     *
+     * @param $date
+     * @return DataObject
+     */
     public static function getRosterForDate($date)
     {
+        $roster = Roster::get()->filter(array(
+            'StartDate:LessThanOrEqual' => $date,
+            'EndDate:GreaterThanOrEqual' => $date
+        ));
 
+        return $roster->first();
     }
 
+    /**
+     * Render with a custom template
+     *
+     * @return HTMLText
+     */
     public function forTemplate()
     {
         return $this->renderWith('Roster');
     }
 
+    /**
+     * Template helper - Returns the start date, then the rest of the columns' dates
+     *
+     * @return ArrayList
+     */
     public function getHeaderItems()
     {
         /** @var ArrayList $data */
@@ -281,13 +305,17 @@ class Roster extends DataObject implements PermissionProvider
 
         for ($i = 0; $i < 5; $i++) {
             $date = new Date();
-            $date->setValue(date('d-m-Y', strtotime('+' . $i . ' days', strtotime($this->StartDate))));
+            $thisDateString = date('d-m-Y', strtotime('+' . $i . ' days', strtotime($this->StartDate)));
+            $date->setValue($thisDateString);
 
-            $isHoliday = (in_array($date->Format('Y-m-d'), $this->getHolidayArray())) ? 'holiday' : '';
+            $holidayClass = (in_array($date->Format('Y-m-d'), $this->getHolidayArray())) ? 'holiday' : '';
+
+            $activeClass = (SS_Datetime::now()->Format('d-m-Y') == $thisDateString) ? 'active' : '';
 
             $data->push(new ArrayData(array(
                 'Date'         => $date,
-                'HolidayClass' => $isHoliday
+                'HolidayClass' => $holidayClass,
+                'ActiveClass'  => $activeClass,
             )));
         }
 
@@ -329,6 +357,18 @@ class Roster extends DataObject implements PermissionProvider
         }
 
         return $data;
+    }
+
+    /**
+     * Set the end date
+     */
+    public function onBeforeWrite()
+    {
+        parent::onBeforeWrite();
+
+        if ($this->isChanged('StartDate') || $this->getField('EndDate') == '') {
+            $this->setField('EndDate', $this->calculateEndDate());
+        }
     }
 
     /**
