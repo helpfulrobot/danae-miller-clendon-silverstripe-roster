@@ -7,6 +7,11 @@
 
 /**
  * Class JobRole
+ *
+ * @property string Title
+ * @property string Phone
+ * @property string Email
+ * @property int Sort
  */
 class JobRole extends DataObject
 {

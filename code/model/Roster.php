@@ -245,6 +245,92 @@ class Roster extends DataObject implements PermissionProvider
         }
     }
 
+    public static function getCurrentRoster()
+    {
+
+    }
+
+    /**
+     * Uses the default sort on Roster to return the most recent one
+     *
+     * @return DataObject
+     */
+    public static function getLatestRoster()
+    {
+        return DataObject::get_one('Roster');
+    }
+
+    public static function getRosterForDate($date)
+    {
+
+    }
+
+    public function forTemplate()
+    {
+        return $this->renderWith('Roster');
+    }
+
+    public function getHeaderItems()
+    {
+        /** @var ArrayList $data */
+        $data = ArrayList::create();
+
+        $data->push(ArrayData::create(array(
+            'Date' => $this->dbObject('StartDate')
+        )));
+
+        for ($i = 0; $i < 5; $i++) {
+            $date = new Date();
+            $date->setValue(date('d-m-Y', strtotime('+' . $i . ' days', strtotime($this->StartDate))));
+
+            $isHoliday = (in_array($date->Format('Y-m-d'), $this->getHolidayArray())) ? 'holiday' : '';
+
+            $data->push(new ArrayData(array(
+                'Date'         => $date,
+                'HolidayClass' => $isHoliday
+            )));
+        }
+
+        return $data;
+    }
+
+    /**
+     * Roster row display for template
+     *
+     * @return ArrayList
+     */
+    public function getRows()
+    {
+        $rows = $this->WeeklyRosters();
+
+        /** @var ArrayList $data */
+        $data = ArrayList::create();
+
+        /** @var JobRole $role */
+        foreach ($rows->getIterator() as $role) {
+
+            /** @var ArrayList $thisRow */
+            $thisRow = ArrayList::create();
+
+            $thisRow->push(ArrayData::create(array(
+                'Item' => $role->Title
+            )));
+
+            for ($i = 0; $i < 5; $i ++) {
+                $thisRow->push(ArrayData::create(array(
+                    'Item' => $role->{"StaffAm{$i}"}
+                )));
+                $thisRow->push(ArrayData::create(array(
+                    'Item' => $role->{"StaffPm{$i}"}
+                )));
+            }
+
+            $data->push(ArrayData::create(array('Items' => $thisRow)));
+        }
+
+        return $data;
+    }
+
     /**
      * @return array
      */
