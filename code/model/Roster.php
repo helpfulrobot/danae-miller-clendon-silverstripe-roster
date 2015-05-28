@@ -13,6 +13,9 @@
  * @property string Holidays
  *
  * @method ManyManyList WeeklyRosters
+ * @method ManyManyList StaffLeave
+ *
+ * @TODO: Implement number of days
  */
 class Roster extends DataObject implements PermissionProvider
 {
@@ -32,7 +35,8 @@ class Roster extends DataObject implements PermissionProvider
     );
 
     private static $many_many = array(
-        'WeeklyRosters' => 'JobRole'
+        'WeeklyRosters' => 'JobRole',
+        'StaffLeave'    => 'Member'
     );
 
     private static $many_many_extraFields = array(
@@ -51,6 +55,9 @@ class Roster extends DataObject implements PermissionProvider
             'StaffPm5' => 'Varchar(20)',
             'StaffAm6' => 'Varchar(20)',
             'StaffPm6' => 'Varchar(20)'
+        ),
+        'StaffLeave' => array(
+            'Leave' => 'Text'
         )
     );
 
@@ -68,11 +75,13 @@ class Roster extends DataObject implements PermissionProvider
     {
         /** =========================================
          * Requirements
-        ==========================================*/
+        ===========================================*/
 
         Requirements::css('roster/css/rosterAdmin.css');
 
-        $fields = parent::getCMSFields();
+        $fields    = parent::getCMSFields();
+        $endDate   = $this->EndDate;
+        $startDate = $this->StartDate;
 
         /** =========================================
          * Date
@@ -83,8 +92,8 @@ class Roster extends DataObject implements PermissionProvider
         $holidayField->setConfig('dateformat', 'dd-MM-yyyy');
         $holidayField->setConfig('showcalendar', true);
         $holidayField->setConfig('separator',', ');
-        $holidayField->setConfig('min', $this->StartDate);
-        $holidayField->setConfig('max', $this->EndDate);
+        $holidayField->setConfig('min', $startDate);
+        $holidayField->setConfig('max', $endDate);
 
         /** @var DateField $dateField */
         $dateField = DateField::create('StartDate');
@@ -102,7 +111,7 @@ class Roster extends DataObject implements PermissionProvider
          * Staff Roster
         ===========================================*/
 
-        $fields->removeByName(array('WeeklyRosters', 'EndDate'));
+        $fields->removeByName(array('WeeklyRosters', 'StaffLeave', 'EndDate'));
 
         /** -----------------------------------------
          * Variables
@@ -120,6 +129,10 @@ class Roster extends DataObject implements PermissionProvider
         -------------------------------------------*/
 
         if ($roles->count()) {
+
+            /** -----------------------------------------
+             * Weekly Rosters
+            -------------------------------------------*/
 
             if ($this->WeeklyRosters()->count()) {
 
@@ -183,6 +196,44 @@ class Roster extends DataObject implements PermissionProvider
                 ));
                 $this->WeeklyRosters()->addMany($roles);
             }
+
+            /** -----------------------------------------
+             * Staff Leave
+            -------------------------------------------*/
+
+            if ($this->StaffLeave()->count()) {
+
+                $editableColumns = new GridFieldEditableColumns();
+                $editableColumns->setDisplayFields(array(
+                    'Title' => array(
+                        'title' => 'Staff Member',
+                        'field' => 'ReadonlyField'
+                    ),
+                    'Leave' => function($record, $column, $grid) use ($staffMap, $startDate, $endDate) {
+                        return MultiDateField::create($column)
+                            ->setConfig('dateformat', 'dd-MM-yyyy')
+                            ->setConfig('showcalendar', true)
+                            ->setConfig('separator',', ')
+                            ->setConfig('min', $startDate)
+                            ->setConfig('max', $endDate);
+                    },
+                ));
+
+                $grid = GridField::create(
+                    'StaffLeave',
+                    sprintf('Staff Leave for %s - %s', $this->dbObject('StartDate')->Format('D jS M'), $this->dbObject('EndDate')->Format('D jS M')),
+                    $this->StaffLeave(),
+                    GridFieldConfig::create()
+                        ->addComponent(new GridFieldToolbarHeader())
+                        ->addComponent(new GridFieldTitleHeader())
+                        ->addComponent($editableColumns)
+                )->addExtraClass('staff-leave-gridfield');
+
+                $fields->addFieldToTab('Root.Main', $grid);
+            } else {
+                $this->StaffLeave()->addMany($staffMembers);
+            }
+
 
         } else {
             // If no job roles exist, display a warning

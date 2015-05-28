@@ -1,5 +1,6 @@
-.roster-gridfield {
+.roster-gridfield, .staff-leave-gridfield {
     margin-top: 24px;
+    border-bottom: none;
 }
 
 #StartDate.field {
@@ -21,7 +22,7 @@
     border-bottom-width: 0;
 }
 
-.roster-gridfield .ss-gridfield-table .ss-gridfield-item.last td {
+.roster-gridfield .ss-gridfield-table .ss-gridfield-item.last td, .staff-leave-gridfield .ss-gridfield-table .ss-gridfield-item.last td  {
      border-bottom: 1px solid rgba(0, 0, 0, 0.1)
 }
 
