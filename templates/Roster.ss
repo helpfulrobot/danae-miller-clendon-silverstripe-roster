@@ -1,54 +1,36 @@
-I'm the roster!
+<table>
+    <tbody>
 
-<div class="container">
-
-    <div class="row">
-        <% loop $HeaderItems %>
-            <div class="col-sm-2 $EvenOdd $FirstLast $HolidayClass">
-                <% if $First %>
-                    <span class="year">$Date.Format('Y')</span>
-                <% else %>
-                    <span class="day">$Date.Format('l')</span>
-                    <span class="date">$Date.Format('j')</span>
-                <% end_if %>
-            </div>
-        <% end_loop %>
-    </div>
-
-    <div class="row">
+    <tr>
         <% loop $HeaderItems %>
             <% if $First %>
-                <div class="col-sm-2 $EvenOdd $FirstLast $HolidayClass">
-                    <span class="month">$Date.Format('M')</span>
-                </div>
+                <th>$Date.Format('F Y')</th>
             <% else %>
-                <div class="col-sm-1 $EvenOdd $FirstLast $HolidayClass">
-                    <span class="period">AM</span>
-                </div>
-                <div class="col-sm-1 $EvenOdd $FirstLast $HolidayClass">
-                    <span class="period">PM</span>
-                </div>
+                <th colspan="2" class="$EvenOdd $FirstLast $HolidayClass">$Date.Format('D jS')</th>
             <% end_if %>
         <% end_loop %>
-    </div>
+    </tr>
 
-    <% loop $Rows %>
-        <div class="row $EvenOdd $FirstLast">
+    <tr>
+        <% loop $HeaderItems %>
+            <% if $First %>
+                <td>Time slot</td>
+            <% else %>
+                <td>AM</td>
+                <td>PM</td>
+            <% end_if %>
+        <% end_loop %>
+    </tr>
+
+        <% loop $Rows %>
+        <tr class="$EvenOdd $FirstLast">
             <% loop $Items %>
 
-                <% if $First %>
-                    <div class="col-sm-2 $EvenOdd $FirstLast">
-                        $Item
-                    </div>
-                <% else %>
-                    <div class="col-sm-1 $EvenOdd $FirstLast">
-                        $Item
-                    </div>
-                <% end_if %>
-
+                <td>$Item</td>
             <% end_loop %>
-        </div>
+        </tr>
+        <% end_loop %>
 
-    <% end_loop %>
+    </tbody>
 
-</div>
+</table>
