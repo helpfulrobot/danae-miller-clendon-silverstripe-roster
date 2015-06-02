@@ -1,0 +1,25 @@
+Roster:
+  current:
+    ID: 1
+    StartDate: 2015-06-01
+    Holidays: 2015-06-01
+  past:
+    ID: 2
+    StartDate: 2015-05-18
+
+Member:
+  staff1:
+    FirstName: John
+    Surname: Smith
+    Initials: JRS
+  staff2:
+    FirstName: Cathy
+    Surname: Brown
+
+JobRole:
+  role1:
+    Title: Auckland reception
+    Phone: 09 123 4567
+  role2:
+    Title: Hamilton reception
+    Phone: 09 456 7894

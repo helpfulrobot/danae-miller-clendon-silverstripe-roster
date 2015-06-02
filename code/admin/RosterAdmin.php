@@ -7,8 +7,6 @@
 
 /**
  * Class RosterAdmin
- *
- * @TODO: Add GridFieldOrderableRows to the gridfield (JobRole)
  */
 class RosterAdmin extends ModelAdmin
 {
@@ -24,4 +22,19 @@ class RosterAdmin extends ModelAdmin
             'title' => 'Job Roles'
         )
     );
+
+    public function getEditForm($id = null, $fields = null)
+    {
+        /** @var Form $form */
+        $form = parent::getEditForm($id, $fields);
+
+        /** @var GridField $gridField */
+        $gridField = $form->Fields()->fieldByName('JobRole');
+
+        if ($gridField) {
+            $gridField->getConfig()->addComponent(new GridFieldOrderableRows('Sort'));
+        }
+
+        return $form;
+    }
 }
