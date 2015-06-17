@@ -360,14 +360,10 @@ class Roster extends DataObject implements PermissionProvider
             $thisDateString = date('d-m-Y', strtotime('+' . $i . ' days', strtotime($this->StartDate)));
             $date->setValue($thisDateString);
 
-            $holidayClass = (in_array($date->Format('Y-m-d'), $this->getHolidayArray())) ? 'holiday' : '';
-
-            $activeClass = (SS_Datetime::now()->Format('d-m-Y') == $thisDateString) ? 'active' : '';
-
             $data->push(new ArrayData(array(
                 'Date'         => $date,
-                'HolidayClass' => $holidayClass,
-                'ActiveClass'  => $activeClass,
+                'HolidayClass' => $this->getIterationHolidayClass($i),
+                'ActiveClass'  => $this->getIterationActiveClass($i),
             )));
         }
 
@@ -376,6 +372,8 @@ class Roster extends DataObject implements PermissionProvider
 
     /**
      * Roster row display for template
+     *
+     * Don't looks at my Big O notation, senpai
      *
      * @return ArrayList
      */
@@ -396,19 +394,104 @@ class Roster extends DataObject implements PermissionProvider
                 'Item' => $role->Title
             )));
 
-            for ($i = 0; $i < 5; $i ++) {
+            for ($i = 0; $i < 5; $i++) {
+
                 $thisRow->push(ArrayData::create(array(
-                    'Item' => Member::get()->filter(array('ID' => explode(',', $role->{"StaffAm{$i}"})))
+                    'Item' => implode(', ', Member::get()->filter(array('ID' => explode(',', $role->{"StaffAm{$i}"})))->Column('FirstName')),
+                    'HolidayClass' => $this->getIterationHolidayClass($i),
+                    'ActiveClass'  => $this->getIterationActiveClass($i)
                 )));
                 $thisRow->push(ArrayData::create(array(
-                    'Item' => Member::get()->filter(array('ID' => explode(',', $role->{"StaffPm{$i}"})))
+                    'Item' => implode(', ', Member::get()->filter(array('ID' => explode(',', $role->{"StaffPm{$i}"})))->Column('FirstName')),
+                    'HolidayClass' => $this->getIterationHolidayClass($i),
+                    'ActiveClass'  => $this->getIterationActiveClass($i)
                 )));
             }
 
             $data->push(ArrayData::create(array('Items' => $thisRow)));
         }
 
+        $dateArray = array();
+
+        // Calculate and add staff leave
+        /** @var Member $member */
+        foreach ($this->StaffLeave()->getIterator() as $member) {
+            $thisLeave = explode(',', $member->Leave);
+            foreach ($thisLeave as $date) {
+                if (isset($dateArray[$date])) {
+                    $dateArray[$date] = array_merge($dateArray[$date], array($member->ID));
+                } else {
+                    $dateArray[$date] = array($member->ID);
+                }
+            }
+        }
+
+        /** @var ArrayList $leaveRow */
+        $leaveRow = ArrayList::create();
+        $leaveRow->push(ArrayData::create(array(
+            'Item' => 'Staff Leave'
+        )));
+
+        for ($i = 0; $i < 5; $i++) {
+
+            $thisDateString = date('Y-m-d', strtotime('+' . $i . ' days', strtotime($this->StartDate)));
+
+            if (isset($dateArray[$thisDateString])) {
+                $leaveRow->push(ArrayData::create(array(
+                    'Item'         => implode(', ', Member::get()->filter(array('ID' => $dateArray[$thisDateString]))->Column('FirstName')),
+                    'HolidayClass' => $this->getIterationHolidayClass($i),
+                    'ActiveClass'  => $this->getIterationActiveClass($i)
+                )));
+                $leaveRow->push(ArrayData::create(array(
+                    'Item'         => implode(', ', Member::get()->filter(array('ID' => $dateArray[$thisDateString]))->Column('FirstName')),
+                    'HolidayClass' => $this->getIterationHolidayClass($i),
+                    'ActiveClass'  => $this->getIterationActiveClass($i)
+                )));
+            } else {
+                $leaveRow->push(ArrayData::create(array(
+                    'Item'         => '',
+                    'HolidayClass' => $this->getIterationHolidayClass($i),
+                    'ActiveClass'  => $this->getIterationActiveClass($i)
+                )));
+                $leaveRow->push(ArrayData::create(array(
+                    'Item'         => '',
+                    'HolidayClass' => $this->getIterationHolidayClass($i),
+                    'ActiveClass'  => $this->getIterationActiveClass($i)
+                )));
+            }
+        }
+
+        $data->push(ArrayData::create(array('Items' => $leaveRow)));
+
         return $data;
+    }
+
+    /**
+     * Returns either 'holiday' or '' for use in Template
+     *
+     * @param int $i Iteration of days
+     * @return string
+     */
+    private function getIterationHolidayClass($i)
+    {
+        $date = new Date();
+        $thisDateString = date('d-m-Y', strtotime('+' . $i . ' days', strtotime($this->StartDate)));
+        $date->setValue($thisDateString);
+
+        return (in_array($date->Format('Y-m-d'), $this->getHolidayArray())) ? 'holiday' : '';
+    }
+
+    /**
+     * Returns either 'active' or '' for use in Template
+     *
+     * @param int $i Iteration of days
+     * @return string
+     */
+    private function getIterationActiveClass($i)
+    {
+        $thisDateString = date('d-m-Y', strtotime('+' . $i . ' days', strtotime($this->StartDate)));
+
+        return (SS_Datetime::now()->Format('d-m-Y') == $thisDateString) ? 'active' : '';
     }
 
     /**

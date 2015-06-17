@@ -32,4 +32,20 @@ class JobRole extends DataObject
     );
 
     private static $default_sort = 'Sort ASC';
+
+    /**
+     * @return FieldList
+     */
+    public function getCMSFields()
+    {
+        $fields = parent::getCMSFields();
+
+        /** =========================================
+         * Main
+         ==========================================*/
+
+        $fields->removeByName(array('Sort'));
+
+        return $fields;
+    }
 }
